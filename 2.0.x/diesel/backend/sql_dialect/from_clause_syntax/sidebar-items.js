@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["AnsiSqlFromClauseSyntax","Indicates that this backend skips the `FROM` clause in `SELECT` statements if no table/view is queried"]]};

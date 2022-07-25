@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["DoesNotSupportReturningClause","Indicates that a backend does not support `RETURNING` clauses"],["PgLikeReturningClause","Indicates that a backend provides support for `RETURNING` clauses using the postgresql `RETURNING` syntax"]],"trait":[["SupportsReturningClause","A marker trait indicating if a `RETURNING` clause is supported or not"]]};

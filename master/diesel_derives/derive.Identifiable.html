@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Implements `Identifiable` for references of the current type"><meta name="keywords" content="rust, rustlang, rust-lang, Identifiable"><title>Identifiable in diesel_derives - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="sidebar-items.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc derive"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../diesel_derives/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../diesel_derives/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><div class="sidebar-elems"><h2 class="location"><a href="index.html">In diesel_derives</a></h2></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../diesel_derives/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Derive Macro <a href="index.html">diesel_derives</a>::<wbr><a class="derive" href="#">Identifiable</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/diesel_derives/lib.rs.html#261">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><pre class="rust derive"><code>#[derive(Identifiable)]
+{
+    // Attributes available to this derive:
+    #[diesel]
+    #[table_name]
+    #[column_name]
+    #[primary_key]
+}
+</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Implements <code>Identifiable</code> for references of the current type</p>
+<p>By default, the primary key field is assumed to be a single field called <code>id</code>.
+If it’s not, you can put <code>#[diesel(primary_key(your_id))]</code> on your struct.
+If you have a composite primary key, the syntax is <code>#[diesel(primary_key(id1, id2))]</code>.</p>
+<p>By default, <code>#[derive(Identifiable)]</code> will assume that your table is
+in scope and its name is the plural form of your struct name.
+Diesel uses very simple pluralization rules.
+It only adds an <code>s</code> to the end, and converts <code>CamelCase</code> to <code>snake_case</code>.
+If your table name does not follow this convention or is not in scope,
+you can specify a path to the table with <code>#[diesel(table_name = path::to::table)]</code>.
+Our rules for inferring table names is considered public API.
+It will never change without a major version bump.</p>
+<p>This derive generates the following impls:</p>
+<ul>
+<li><code>impl Identifiable for &amp;'a YourType</code></li>
+<li><code>impl Identifiable for &amp;'_ &amp;'a YourType</code></li>
+</ul>
+<h2 id="attributes"><a href="#attributes">Attributes</a></h2><h3 id="optional-container-attributes"><a href="#optional-container-attributes">Optional container attributes</a></h3>
+<ul>
+<li><code>#[diesel(table_name = path::to::table)]</code> specifies a path to the table this
+type belongs to. The path is relative to the current module.
+If this attribute is not used, the type name converted to
+<code>snake_case</code> with an added <code>s</code> is used as table name</li>
+<li><code>#[diesel(primary_key(id1, id2))]</code> to specify the struct field that
+that corresponds to the primary key. If not used, <code>id</code> will be
+assumed as primary key field</li>
+</ul>
+<h2 id="optional-field-attributes"><a href="#optional-field-attributes">Optional field attributes</a></h2>
+<ul>
+<li><code>#[diesel(column_name = some_column_name)]</code>, overrides the column the current
+field maps to to <code>some_column_name</code>. By default the field name is used
+as column name.</li>
+</ul>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="diesel_derives" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (7fe022f5a 2022-07-24)" ></div>
+</body></html>

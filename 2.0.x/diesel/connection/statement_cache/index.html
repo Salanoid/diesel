@@ -1,0 +1,120 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Helper types for prepared statement caching"><meta name="keywords" content="rust, rustlang, rust-lang, statement_cache"><title>diesel::connection::statement_cache - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module statement_cache</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../diesel/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../../index.html">diesel</a>::<wbr><a href="../index.html">connection</a>::<wbr><a class="mod" href="#">statement_cache</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../../src/diesel/connection/statement_cache.rs.html#1-329">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><span class="item-info"><div class="stab portability">Available on <strong>crate feature <code>i-implement-a-third-party-backend-and-opt-into-breaking-changes</code></strong> only.</div></span><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Helper types for prepared statement caching</p>
+<h3 id="a-primer-on-prepared-statement-caching-in-diesel"><a href="#a-primer-on-prepared-statement-caching-in-diesel">A primer on prepared statement caching in Diesel</a></h3>
+<p>Diesel uses prepared statements for virtually all queries. This is most
+visible in our lack of any sort of “quoting” API. Values must always be
+transmitted as bind parameters, we do not support direct interpolation. The
+only method in the public API that doesn’t require the use of prepared
+statements is <a href="../trait.SimpleConnection.html#tymethod.batch_execute"><code>SimpleConnection::batch_execute</code></a>.</p>
+<p>In order to avoid the cost of re-parsing and planning subsequent queries,
+Diesel caches the prepared statement whenever possible. Queries will fall
+into one of three buckets:</p>
+<ul>
+<li>Unsafe to cache</li>
+<li>Cached by SQL</li>
+<li>Cached by type</li>
+</ul>
+<p>A query is considered unsafe to cache if it represents a potentially
+unbounded number of queries. This is communicated to the connection through
+<a href="../../query_builder/trait.QueryFragment.html#method.is_safe_to_cache_prepared" title="QueryFragment::is_safe_to_cache_prepared"><code>QueryFragment::is_safe_to_cache_prepared</code></a>. While this is done as a full AST
+pass, after monomorphisation and inlining this will usually be optimized to
+a constant. Only boxed queries will need to do actual work to answer this
+question.</p>
+<p>The majority of AST nodes are safe to cache if their components are safe to
+cache. There are at least 4 cases where a query is unsafe to cache:</p>
+<ul>
+<li>queries containing <code>IN</code> with bind parameters
+<ul>
+<li>This requires 1 bind parameter per value, and is therefore unbounded</li>
+<li><code>IN</code> with subselects are cached (assuming the subselect is safe to
+cache)</li>
+<li><code>IN</code> statements for postgresql are cached as they use <code>= ANY($1)</code> instead
+which does not cause a unbound number of binds</li>
+</ul>
+</li>
+<li><code>INSERT</code> statements with a variable number of rows
+<ul>
+<li>The SQL varies based on the number of rows being inserted.</li>
+</ul>
+</li>
+<li><code>UPDATE</code> statements
+<ul>
+<li>Technically it’s bounded on “number of optional values being passed to
+<code>SET</code> factorial” but that’s still quite high, and not worth caching
+for the same reason as single row inserts</li>
+</ul>
+</li>
+<li><code>SqlLiteral</code> nodes
+<ul>
+<li>We have no way of knowing whether the SQL was generated dynamically or
+not, so we must assume that it’s unbounded</li>
+</ul>
+</li>
+</ul>
+<p>For queries which are unsafe to cache, the statement cache will never insert
+them. They will be prepared and immediately released after use (or in the
+case of PG they will use the unnamed prepared statement).</p>
+<p>For statements which are able to be cached, we then have to determine what
+to use as the cache key. The standard method that virtually all ORMs or
+database access layers use in the wild is to store the statements in a
+hash map, using the SQL as the key.</p>
+<p>However, the majority of queries using Diesel that are safe to cache as
+prepared statements will be uniquely identified by their type. For these
+queries, we can bypass the query builder entirely. Since our AST is
+generally optimized away by the compiler, for these queries the cost of
+fetching a prepared statement from the cache is the cost of <a href="https://doc.rust-lang.org/nightly/std/collections/hash/map/struct.HashMap.html#method.get" title="HashMap&lt;u32, _&gt;::get"><code>HashMap&lt;u32, _&gt;::get</code></a>, where the key we’re fetching by is a compile time constant. For
+these types, the AST pass to gather the bind parameters will also be
+optimized to accessing each parameter individually.</p>
+<p>Determining if a query can be cached by type is the responsibility of the
+<a href="../../query_builder/trait.QueryId.html" title="QueryId"><code>QueryId</code></a> trait. This trait is quite similar to <code>Any</code>, but with a few
+differences:</p>
+<ul>
+<li>No <code>'static</code> bound
+<ul>
+<li>Something being a reference never changes the SQL that is generated,
+so <code>&amp;T</code> has the same query id as <code>T</code>.</li>
+</ul>
+</li>
+<li><code>Option&lt;TypeId&gt;</code> instead of <code>TypeId</code>
+<ul>
+<li>We need to be able to constrain on this trait being implemented, but
+not all types will actually have a static query id. Hopefully once
+specialization is stable we can remove the <code>QueryId</code> bound and
+specialize on it instead (or provide a blanket impl for all <code>T</code>)</li>
+</ul>
+</li>
+<li>Implementors give a more broad type than <code>Self</code>
+<ul>
+<li>This really only affects bind parameters. There are 6 different Rust
+types which can be used for a parameter of type <code>timestamp</code>. The same
+statement can be used regardless of the Rust type, so <a href="crate::expression::bound::Bound"><code>Bound&lt;ST, T&gt;</code></a>
+defines its <a href="../../query_builder/trait.QueryId.html" title="QueryId"><code>QueryId</code></a> as <a href="crate::expression::bound::Bound"><code>Bound&lt;ST, ()&gt;</code></a>.</li>
+</ul>
+</li>
+</ul>
+<p>A type returning <code>Some(id)</code> or <code>None</code> for its query ID is based on whether
+the SQL it generates can change without the type changing. At the moment,
+the only type which is safe to cache as a prepared statement but does not
+have a static query ID is something which has been boxed.</p>
+<p>One potential optimization that we don’t perform is storing the queries
+which are cached by type ID in a separate map. Since a type ID is a u64,
+this would allow us to use a specialized map which knows that there will
+never be hashing collisions (also known as a perfect hashing function),
+which would mean lookups are always constant time. However, this would save
+nanoseconds on an operation that will take microseconds or even
+milliseconds.</p>
+</div></details><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.StatementCache.html" title="diesel::connection::statement_cache::StatementCache struct">StatementCache</a></div><div class="item-right docblock-short"><p>A prepared statement cache</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.MaybeCached.html" title="diesel::connection::statement_cache::MaybeCached enum">MaybeCached</a></div><div class="item-right docblock-short"><p>Wraps a possibly cached prepared statement</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.PrepareForCache.html" title="diesel::connection::statement_cache::PrepareForCache enum">PrepareForCache</a></div><div class="item-right docblock-short"><p>A helper type that indicates if a certain query
+is cached inside of the prepared statement cache or not</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.StatementCacheKey.html" title="diesel::connection::statement_cache::StatementCacheKey enum">StatementCacheKey</a></div><div class="item-right docblock-short"><p>The lookup key used by <a href="struct.StatementCache.html" title="StatementCache"><code>StatementCache</code></a> internally</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (62b272d25 2022-07-21)" ></div>
+</body></html>

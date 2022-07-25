@@ -1,0 +1,1085 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `diesel/src/lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../diesel/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<span id="2">2</span>
+<span id="3">3</span>
+<span id="4">4</span>
+<span id="5">5</span>
+<span id="6">6</span>
+<span id="7">7</span>
+<span id="8">8</span>
+<span id="9">9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+<span id="38">38</span>
+<span id="39">39</span>
+<span id="40">40</span>
+<span id="41">41</span>
+<span id="42">42</span>
+<span id="43">43</span>
+<span id="44">44</span>
+<span id="45">45</span>
+<span id="46">46</span>
+<span id="47">47</span>
+<span id="48">48</span>
+<span id="49">49</span>
+<span id="50">50</span>
+<span id="51">51</span>
+<span id="52">52</span>
+<span id="53">53</span>
+<span id="54">54</span>
+<span id="55">55</span>
+<span id="56">56</span>
+<span id="57">57</span>
+<span id="58">58</span>
+<span id="59">59</span>
+<span id="60">60</span>
+<span id="61">61</span>
+<span id="62">62</span>
+<span id="63">63</span>
+<span id="64">64</span>
+<span id="65">65</span>
+<span id="66">66</span>
+<span id="67">67</span>
+<span id="68">68</span>
+<span id="69">69</span>
+<span id="70">70</span>
+<span id="71">71</span>
+<span id="72">72</span>
+<span id="73">73</span>
+<span id="74">74</span>
+<span id="75">75</span>
+<span id="76">76</span>
+<span id="77">77</span>
+<span id="78">78</span>
+<span id="79">79</span>
+<span id="80">80</span>
+<span id="81">81</span>
+<span id="82">82</span>
+<span id="83">83</span>
+<span id="84">84</span>
+<span id="85">85</span>
+<span id="86">86</span>
+<span id="87">87</span>
+<span id="88">88</span>
+<span id="89">89</span>
+<span id="90">90</span>
+<span id="91">91</span>
+<span id="92">92</span>
+<span id="93">93</span>
+<span id="94">94</span>
+<span id="95">95</span>
+<span id="96">96</span>
+<span id="97">97</span>
+<span id="98">98</span>
+<span id="99">99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+</pre><pre class="rust"><code><span class="doccomment">//! # Diesel</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Diesel is an ORM and query builder designed to reduce the boilerplate for database interactions.</span>
+<span class="doccomment">//! If this is your first time reading this documentation,</span>
+<span class="doccomment">//! we recommend you start with the [getting started guide].</span>
+<span class="doccomment">//! We also have [many other long form guides].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [getting started guide]: https://diesel.rs/guides/getting-started/</span>
+<span class="doccomment">//! [many other long form guides]: https://diesel.rs/guides</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Where to find things</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Declaring your schema</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! For Diesel to validate your queries at compile time</span>
+<span class="doccomment">//! it requires you to specify your schema in your code,</span>
+<span class="doccomment">//! which you can do with [the `table!` macro][`table!`].</span>
+<span class="doccomment">//! `diesel print-schema` can be used</span>
+<span class="doccomment">//! to automatically generate these macro calls</span>
+<span class="doccomment">//! (by connecting to your database and querying its schema).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Getting started</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Queries usually start from either a table, or a function like [`update`].</span>
+<span class="doccomment">//! Those functions can be found [here](#functions).</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Diesel provides a [`prelude` module](prelude),</span>
+<span class="doccomment">//! which exports most of the typically used traits and types.</span>
+<span class="doccomment">//! We are conservative about what goes in this module,</span>
+<span class="doccomment">//! and avoid anything which has a generic name.</span>
+<span class="doccomment">//! Files which use Diesel are expected to have `use diesel::prelude::*;`.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [`update`]: update()</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Constructing a query</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The tools the query builder gives you can be put into these three categories:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! - &quot;Query builder methods&quot; are things that map to portions of a whole query</span>
+<span class="doccomment">//!   (such as `ORDER` and `WHERE`). These methods usually have the same name</span>
+<span class="doccomment">//!   as the SQL they map to, except for `WHERE` which is called `filter` in Diesel</span>
+<span class="doccomment">//!   (To not conflict with the Rust keyword).</span>
+<span class="doccomment">//!   These methods live in [the `query_dsl` module](query_dsl).</span>
+<span class="doccomment">//! - &quot;Expression methods&quot; are things you would call on columns</span>
+<span class="doccomment">//!   or other individual values.</span>
+<span class="doccomment">//!   These methods live in [the `expression_methods` module](expression_methods)</span>
+<span class="doccomment">//!   You can often find these by thinking &quot;what would this be called&quot;</span>
+<span class="doccomment">//!   if it were a method</span>
+<span class="doccomment">//!   and typing that into the search bar</span>
+<span class="doccomment">//!   (e.g. `LIKE` is called `like` in Diesel).</span>
+<span class="doccomment">//!   Most operators are named based on the Rust function which maps to that</span>
+<span class="doccomment">//!   operator in [`std::ops`][]</span>
+<span class="doccomment">//!   (For example `==` is called `.eq`, and `!=` is called `.ne`).</span>
+<span class="doccomment">//! - &quot;Bare functions&quot; are normal SQL functions</span>
+<span class="doccomment">//!   such as `sum`.</span>
+<span class="doccomment">//!   They live in [the `dsl` module](dsl).</span>
+<span class="doccomment">//!   Diesel only supports a very small number of these functions.</span>
+<span class="doccomment">//!   You can declare additional functions you want to use</span>
+<span class="doccomment">//!   with [the `sql_function!` macro][`sql_function!`].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [`std::ops`]: //doc.rust-lang.org/stable/std/ops/index.html</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Serializing and Deserializing</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Types which represent the result of a SQL query implement</span>
+<span class="doccomment">//! a trait called [`Queryable`].</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Diesel maps &quot;Rust types&quot; (e.g. `i32`) to and from &quot;SQL types&quot;</span>
+<span class="doccomment">//! (e.g. [`diesel::sql_types::Integer`]).</span>
+<span class="doccomment">//! You can find all the types supported by Diesel in [the `sql_types` module](sql_types).</span>
+<span class="doccomment">//! These types are only used to represent a SQL type.</span>
+<span class="doccomment">//! You should never put them on your `Queryable` structs.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! To find all the Rust types which can be used with a given SQL type,</span>
+<span class="doccomment">//! see the documentation for that SQL type.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! To find all the SQL types which can be used with a Rust type,</span>
+<span class="doccomment">//! go to the docs for either [`ToSql`] or [`FromSql`],</span>
+<span class="doccomment">//! go to the &quot;Implementors&quot; section,</span>
+<span class="doccomment">//! and find the Rust type you want to use.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [`Queryable`]: deserialize::Queryable</span>
+<span class="doccomment">//! [`diesel::sql_types::Integer`]: sql_types::Integer</span>
+<span class="doccomment">//! [`ToSql`]: serialize::ToSql</span>
+<span class="doccomment">//! [`FromSql`]: deserialize::FromSql</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Getting help</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! If you run into problems, Diesel has an active community.</span>
+<span class="doccomment">//! Either open a new [discussion] thread at diesel github repository or</span>
+<span class="doccomment">//! use the active Gitter room at</span>
+<span class="doccomment">//! [gitter.im/diesel-rs/diesel](https://gitter.im/diesel-rs/diesel)</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! [discussion]: https://github.com/diesel-rs/diesel/discussions/categories/q-a</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! # Crate feature flags</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The following feature flags are considered to be part of diesels public</span>
+<span class="doccomment">//! API. Any feature flag that is not listed here is **not** considered to</span>
+<span class="doccomment">//! be part of the public API and can disappear at any point in time:</span>
+
+<span class="doccomment">//!</span>
+<span class="doccomment">//! - `sqlite`: This feature enables the diesel sqlite backend. Enabling this feature requires a compatible copy</span>
+<span class="doccomment">//! of `libsqlite3` for your target architecture.</span>
+<span class="doccomment">//! - `postgres`: This feature enables the diesel postgres backend. Enabling this feature requires a compatible</span>
+<span class="doccomment">//! copy of `libpq` for your target architecture. This features implies `postgres_backend`</span>
+<span class="doccomment">//! - `mysql`: This feature enables the idesel mysql backend. Enabling this feature requires a compatible copy</span>
+<span class="doccomment">//! of `libmysqlclient` for your target architecture. This feature implies `mysql_backend`</span>
+<span class="doccomment">//! - `postgres_backend`: This feature enables those parts of diesels postgres backend, that are not dependend</span>
+<span class="doccomment">//! on `libpq`. Diesel does not provide any connection implementation with only this feature enabled.</span>
+<span class="doccomment">//! This feature can be used to implement a custom implementation of diesels `Connection` trait for the</span>
+<span class="doccomment">//! postgres backend outside of diesel itself, while reusing the existing query dsl extensions for the</span>
+<span class="doccomment">//! postgres backend</span>
+<span class="doccomment">//! - `mysql_backend`: This feature enables those parts of diesels mysql backend, that are not dependend</span>
+<span class="doccomment">//! on `libmysqlclient`. Diesel does not provide any connection implementation with only this feature enabled.</span>
+<span class="doccomment">//! This feature can be used to implement a custom implementation of diesels `Connection` trait for the</span>
+<span class="doccomment">//! mysql backend outside of diesel itself, while reusing the existing query dsl extensions for the</span>
+<span class="doccomment">//! mysql backend</span>
+<span class="doccomment">//! - `returning_clauses_for_sqlite_3_35`: This feature enables support for `RETURNING` clauses in the sqlite backend.</span>
+<span class="doccomment">//! Enabling this feature requires sqlite 3.35.0 or newer.</span>
+<span class="doccomment">//! - `32-column-tables`: This feature enables support for tables with up to 32 columns.</span>
+<span class="doccomment">//! This feature is enabled by default. Consider disabling this feature if you write a library crate</span>
+<span class="doccomment">//! providing general extensions for diesel or if you do not need to support tables with more than 16 columns</span>
+<span class="doccomment">//! and you want to minimize your compile times.</span>
+<span class="doccomment">//! - `64-column-tables`: This feature enables support for tables with up to 64 columns. It implies the</span>
+<span class="doccomment">//! `32-column-tables` feature. Enabling this feature will increase your compile times.</span>
+<span class="doccomment">//! - `128-column-tables`: This feature enables support for tables with up to 128 columns. It implies the</span>
+<span class="doccomment">//! `64-column-tables` feature. Enabling this feature will increase your compile times significantly.</span>
+<span class="doccomment">//! - `i-implement-a-third-party-backend-and-opt-into-breaking-changes`: This feature opens up some otherwise</span>
+<span class="doccomment">//! private API, that can be useful to implement a third party [`Backend`](crate::backend::Backend)</span>
+<span class="doccomment">//! or write a custom [`Connection`](crate::connection::Connection) implementation. **Do not use this feature for</span>
+<span class="doccomment">//! any other usecase**. By enabling this feature you explicitly opt out diesel stability guarantees. We explicitly</span>
+<span class="doccomment">//! reserve us the right to break API&#39;s exported under this feature flag in any upcoming minor version release.</span>
+<span class="doccomment">//! If you publish a crate depending on this feature flag consider to restrict the supported diesel version to the</span>
+<span class="doccomment">//! currently released minor version.</span>
+<span class="doccomment">//! - `serde_json`: This feature flag enables support for (de)serializing json values from the database using</span>
+<span class="doccomment">//! types provided by `serde_json`.</span>
+<span class="doccomment">//! - `chrono`: This feature flags enables support for (de)serializing date/time values from the database using</span>
+<span class="doccomment">//! types provided by `chrono`</span>
+<span class="doccomment">//! - `uuid`: This feature flag enables support for (de)serializing uuid values from the database using types</span>
+<span class="doccomment">//! provided by `uuid`</span>
+<span class="doccomment">//! - `network-address`: This feature flag enables support for (de)serializing</span>
+<span class="doccomment">//! IP values from the database using types provided by `ipnetwork`.</span>
+<span class="doccomment">//! - `ipnet-address`: This feature flag enables support for (de)serializing IP</span>
+<span class="doccomment">//! values from the database using types provided by `ipnet`.</span>
+<span class="doccomment">//! - `numeric`: This feature flag enables support for (de)serializing numeric values from the database using types</span>
+<span class="doccomment">//! provided by `bigdecimal`</span>
+<span class="doccomment">//! - `r2d2`: This feature flag enables support for the `r2d2` connection pool implementation.</span>
+<span class="doccomment">//! - `extras`: This feature enables the feature flaged support for any third party crate. This implies the</span>
+<span class="doccomment">//! following feature flags: `serde_json`, `chrono`, `uuid`, `network-address`, `numeric`, `r2d2`</span>
+<span class="doccomment">//! - `with-deprecated`: This feature enables items marked as `#[deprecated]`. It is enabled by default.</span>
+<span class="doccomment">//! disabling this feature explicitly opts out diesels stability guarantee.</span>
+<span class="doccomment">//! - `without-deprecated`: This feature disables any item marked as `#[deprecated]`. Enabling this feature</span>
+<span class="doccomment">//! explicitly opts out the stability guarantee given by diesel. This feature overrides the `with-deprecated`.</span>
+<span class="doccomment">//! Note that this may also remove items that are not shown as `#[deprecated]` in our documentation, due to</span>
+<span class="doccomment">//! various bugs in rustdoc. It can be used to check if you depend on any such hidden `#[deprecated]` item.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! By default the following features are enabled:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! - `with-deprecated`</span>
+<span class="doccomment">//! - `32-column-tables`</span>
+
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable&quot;</span>, <span class="ident">feature</span>(<span class="ident">trait_alias</span>))]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">doc_cfg</span>, <span class="ident">feature</span>(<span class="ident">doc_cfg</span>, <span class="ident">doc_auto_cfg</span>))]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;128-column-tables&quot;</span>, <span class="ident">recursion_limit</span> <span class="op">=</span> <span class="string">&quot;256&quot;</span>)]</span>
+<span class="comment">// Built-in Lints</span>
+<span class="attribute">#![<span class="ident">warn</span>(
+    <span class="ident">unreachable_pub</span>,
+    <span class="ident">missing_debug_implementations</span>,
+    <span class="ident">missing_copy_implementations</span>,
+    <span class="ident">elided_lifetimes_in_paths</span>,
+    <span class="ident">missing_docs</span>
+)]</span>
+<span class="comment">// Clippy lints</span>
+<span class="attribute">#![<span class="ident">allow</span>(
+    <span class="ident">clippy::match_same_arms</span>,
+    <span class="ident">clippy::needless_doctest_main</span>,
+    <span class="ident">clippy::map_unwrap_or</span>,
+    <span class="ident">clippy::redundant_field_names</span>,
+    <span class="ident">clippy::type_complexity</span>
+)]</span>
+<span class="attribute">#![<span class="ident">warn</span>(
+    <span class="ident">clippy::unwrap_used</span>,
+    <span class="ident">clippy::print_stdout</span>,
+    <span class="ident">clippy::mut_mut</span>,
+    <span class="ident">clippy::non_ascii_literal</span>,
+    <span class="ident">clippy::similar_names</span>,
+    <span class="ident">clippy::unicode_not_nfc</span>,
+    <span class="ident">clippy::enum_glob_use</span>,
+    <span class="ident">clippy::if_not_else</span>,
+    <span class="ident">clippy::items_after_statements</span>,
+    <span class="ident">clippy::used_underscore_binding</span>
+)]</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">test</span>, <span class="ident">allow</span>(<span class="ident">clippy::map_unwrap_or</span>, <span class="ident">clippy::unwrap_used</span>))]</span>
+
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">diesel_derives</span>;
+
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">macros</span>;
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">internal</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">extern</span> <span class="kw">crate</span> <span class="ident">cfg_if</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">test_helpers</span>;
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">associations</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">backend</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">connection</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">data_types</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">deserialize</span>;
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">expression</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">expression_methods</span>;
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">insertable</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">query_builder</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">query_dsl</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">query_source</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;r2d2&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">r2d2</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">result</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">serialize</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">upsert</span>;
+<span class="attribute">#[<span class="ident">macro_use</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sql_types</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">migration</span>;
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">row</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mysql_backend&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">mysql</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;postgres_backend&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pg</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;sqlite&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">sqlite</span>;
+
+<span class="kw">mod</span> <span class="ident">type_impls</span>;
+<span class="kw">mod</span> <span class="ident">util</span>;
+
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;with-deprecated&quot;</span>, <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;without-deprecated&quot;</span>)))]</span>
+<span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">since</span> <span class="op">=</span> <span class="string">&quot;2.0.0&quot;</span>, <span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;Use explicit macro imports instead&quot;</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">diesel_derives</span>::{
+    <span class="ident">AsChangeset</span>, <span class="ident">AsExpression</span>, <span class="ident">Associations</span>, <span class="ident">DieselNumericOps</span>, <span class="ident">FromSqlRow</span>, <span class="ident">Identifiable</span>,
+    <span class="ident">Insertable</span>, <span class="ident">QueryId</span>, <span class="ident">Queryable</span>, <span class="ident">QueryableByName</span>, <span class="ident">SqlType</span>,
+};
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">dsl</span> {
+    <span class="doccomment">//! Includes various helper types and bare functions which are named too</span>
+    <span class="doccomment">//! generically to be included in prelude, but are often used when using Diesel.</span>
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::helper_types</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::expression::dsl</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_builder::functions</span>::{
+        <span class="ident">delete</span>, <span class="ident">insert_into</span>, <span class="ident">insert_or_ignore_into</span>, <span class="ident">replace_into</span>, <span class="ident">select</span>, <span class="ident">sql_query</span>, <span class="ident">update</span>,
+    };
+}
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">helper_types</span> {
+    <span class="doccomment">//! Provide helper types for concisely writing the return type of functions.</span>
+    <span class="doccomment">//! As with iterators, it is unfortunately difficult to return a partially</span>
+    <span class="doccomment">//! constructed query without exposing the exact implementation of the</span>
+    <span class="doccomment">//! function. Without higher kinded types, these various DSLs can&#39;t be</span>
+    <span class="doccomment">//! combined into a single trait for boxing purposes.</span>
+    <span class="doccomment">//!</span>
+    <span class="doccomment">//! All types here are in the form `&lt;FirstType as</span>
+    <span class="doccomment">//! DslName&lt;OtherTypes&gt;&gt;::Output`. So the return type of</span>
+    <span class="doccomment">//! `users.filter(first_name.eq(&quot;John&quot;)).order(last_name.asc()).limit(10)` would</span>
+    <span class="doccomment">//! be `Limit&lt;Order&lt;FindBy&lt;users, first_name, &amp;str&gt;, Asc&lt;last_name&gt;&gt;&gt;`</span>
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::query_builder::combination_clause</span>::{<span class="self">self</span>, <span class="ident">CombinationClause</span>};
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::query_builder</span>::{<span class="ident">locking_clause</span> <span class="kw">as</span> <span class="ident">lock</span>, <span class="ident">AsQuery</span>};
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::query_dsl::methods</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::query_dsl</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::query_source</span>::{<span class="ident">aliasing</span>, <span class="ident">joins</span>};
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::connection::DefaultLoadingMode</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_builder::select_clause::SelectClause</span>;
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::expression::helper_types</span>::<span class="kw-2">*</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.select(selection)`](crate::prelude::QueryDsl::select)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Select</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Selection</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">SelectDsl</span><span class="op">&lt;</span><span class="ident">Selection</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`diesel::select(selection)`](crate::select)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">BareSelect</span><span class="op">&lt;</span><span class="ident">Selection</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::query_builder::SelectStatement</span><span class="op">&lt;</span>
+        <span class="ident"><span class="kw">crate</span>::query_builder::NoFromClause</span>,
+        <span class="ident">SelectClause</span><span class="op">&lt;</span><span class="ident">Selection</span><span class="op">&gt;</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.filter(predicate)`](crate::prelude::QueryDsl::filter)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Filter</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Predicate</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">FilterDsl</span><span class="op">&lt;</span><span class="ident">Predicate</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.filter(lhs.eq(rhs))`](crate::prelude::QueryDsl::filter)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">FindBy</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Column</span>, <span class="ident">Value</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Filter</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Eq</span><span class="op">&lt;</span><span class="ident">Column</span>, <span class="ident">Value</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.for_update()`](crate::prelude::QueryDsl::for_update)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ForUpdate</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">LockingDsl</span><span class="op">&lt;</span><span class="ident">lock::ForUpdate</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.for_no_key_update()`](crate::prelude::QueryDsl::for_no_key_update)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ForNoKeyUpdate</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">LockingDsl</span><span class="op">&lt;</span><span class="ident">lock::ForNoKeyUpdate</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.for_share()`](crate::prelude::QueryDsl::for_share)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ForShare</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">LockingDsl</span><span class="op">&lt;</span><span class="ident">lock::ForShare</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.for_key_share()`](crate::prelude::QueryDsl::for_key_share)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ForKeyShare</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">LockingDsl</span><span class="op">&lt;</span><span class="ident">lock::ForKeyShare</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.skip_locked()`](crate::prelude::QueryDsl::skip_locked)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SkipLocked</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">ModifyLockDsl</span><span class="op">&lt;</span><span class="ident">lock::SkipLocked</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.no_wait()`](crate::prelude::QueryDsl::no_wait)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">NoWait</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">ModifyLockDsl</span><span class="op">&lt;</span><span class="ident">lock::NoWait</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.find(pk)`](crate::prelude::QueryDsl::find)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Find</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">PK</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">FindDsl</span><span class="op">&lt;</span><span class="ident">PK</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.or_filter(predicate)`](crate::prelude::QueryDsl::or_filter)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">OrFilter</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Predicate</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">OrFilterDsl</span><span class="op">&lt;</span><span class="ident">Predicate</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.order(ordering)`](crate::prelude::QueryDsl::order)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Order</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Ordering</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">OrderDsl</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.then_order_by(ordering)`](crate::prelude::QueryDsl::then_order_by)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ThenOrderBy</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Ordering</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">ThenOrderDsl</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.limit()`](crate::prelude::QueryDsl::limit)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Limit</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">LimitDsl</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.offset()`](crate::prelude::QueryDsl::offset)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Offset</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">OffsetDsl</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.inner_join(rhs)`](crate::prelude::QueryDsl::inner_join)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">InnerJoin</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">JoinWithImplicitOnClause</span><span class="op">&lt;</span><span class="ident">Rhs</span>, <span class="ident">joins::Inner</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.inner_join(rhs.on(on))`](crate::prelude::QueryDsl::inner_join)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">InnerJoinOn</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span>, <span class="ident">On</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">InternalJoinDsl</span><span class="op">&lt;</span><span class="ident">Rhs</span>, <span class="ident">joins::Inner</span>, <span class="ident">On</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.left_join(rhs)`](crate::prelude::QueryDsl::left_join)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LeftJoin</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">JoinWithImplicitOnClause</span><span class="op">&lt;</span><span class="ident">Rhs</span>, <span class="ident">joins::LeftOuter</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.left_join(rhs.on(on))`](crate::prelude::QueryDsl::left_join)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LeftJoinOn</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span>, <span class="ident">On</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">InternalJoinDsl</span><span class="op">&lt;</span><span class="ident">Rhs</span>, <span class="ident">joins::LeftOuter</span>, <span class="ident">On</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`rhs.on(on)`](crate::query_dsl::JoinOnDsl::on)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">On</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">On</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">joins::OnClauseWrapper</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">On</span><span class="op">&gt;</span>;
+
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::associations::HasTable</span>;
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::query_builder</span>::{<span class="ident">AsChangeset</span>, <span class="ident">IntoUpdateTarget</span>, <span class="ident">UpdateStatement</span>};
+
+    <span class="doccomment">/// Represents the return type of [`update(lhs).set(rhs)`](crate::query_builder::UpdateStatement::set)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Update</span><span class="op">&lt;</span><span class="ident">Target</span>, <span class="ident">Changes</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">UpdateStatement</span><span class="op">&lt;</span>
+        <span class="op">&lt;</span><span class="ident">Target</span> <span class="kw">as</span> <span class="ident">HasTable</span><span class="op">&gt;</span><span class="ident">::Table</span>,
+        <span class="op">&lt;</span><span class="ident">Target</span> <span class="kw">as</span> <span class="ident">IntoUpdateTarget</span><span class="op">&gt;</span><span class="ident">::WhereClause</span>,
+        <span class="op">&lt;</span><span class="ident">Changes</span> <span class="kw">as</span> <span class="ident">AsChangeset</span><span class="op">&gt;</span><span class="ident">::Changeset</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.into_boxed::&lt;&#39;a, DB&gt;()`](crate::prelude::QueryDsl::into_boxed)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">IntoBoxed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Source</span>, <span class="ident">DB</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">BoxedDsl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">DB</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.distinct()`](crate::prelude::QueryDsl::distinct)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Distinct</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">DistinctDsl</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.distinct_on(expr)`](crate::prelude::QueryDsl::distinct_on)</span>
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;postgres_backend&quot;</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">DistinctOn</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Expr</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">DistinctOnDsl</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.single_value()`](SingleValueDsl::single_value)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">SingleValue</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">SingleValueDsl</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.nullable()`](SelectNullableDsl::nullable)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">NullableSelect</span><span class="op">&lt;</span><span class="ident">Source</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">SelectNullableDsl</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.group_by(expr)`](crate::prelude::QueryDsl::group_by)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">GroupBy</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Expr</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">GroupByDsl</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.having(predicate)`](crate::prelude::QueryDsl::having)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Having</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Predicate</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">HavingDsl</span><span class="op">&lt;</span><span class="ident">Predicate</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Output</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.union(rhs)`](crate::prelude::CombineDsl::union)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Union</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CombinationClause</span><span class="op">&lt;</span>
+        <span class="ident">combination_clause::Union</span>,
+        <span class="ident">combination_clause::Distinct</span>,
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">CombineDsl</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+        <span class="op">&lt;</span><span class="ident">Rhs</span> <span class="kw">as</span> <span class="ident">AsQuery</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.union_all(rhs)`](crate::prelude::CombineDsl::union_all)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">UnionAll</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CombinationClause</span><span class="op">&lt;</span>
+        <span class="ident">combination_clause::Union</span>,
+        <span class="ident">combination_clause::All</span>,
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">CombineDsl</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+        <span class="op">&lt;</span><span class="ident">Rhs</span> <span class="kw">as</span> <span class="ident">AsQuery</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.intersect(rhs)`](crate::prelude::CombineDsl::intersect)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Intersect</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CombinationClause</span><span class="op">&lt;</span>
+        <span class="ident">combination_clause::Intersect</span>,
+        <span class="ident">combination_clause::Distinct</span>,
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">CombineDsl</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+        <span class="op">&lt;</span><span class="ident">Rhs</span> <span class="kw">as</span> <span class="ident">AsQuery</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.intersect_all(rhs)`](crate::prelude::CombineDsl::intersect_all)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">IntersectAll</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CombinationClause</span><span class="op">&lt;</span>
+        <span class="ident">combination_clause::Intersect</span>,
+        <span class="ident">combination_clause::All</span>,
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">CombineDsl</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+        <span class="op">&lt;</span><span class="ident">Rhs</span> <span class="kw">as</span> <span class="ident">AsQuery</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.except(rhs)`](crate::prelude::CombineDsl::except)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Except</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CombinationClause</span><span class="op">&lt;</span>
+        <span class="ident">combination_clause::Except</span>,
+        <span class="ident">combination_clause::Distinct</span>,
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">CombineDsl</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+        <span class="op">&lt;</span><span class="ident">Rhs</span> <span class="kw">as</span> <span class="ident">AsQuery</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="doccomment">/// Represents the return type of [`.except_all(rhs)`](crate::prelude::CombineDsl::except_all)</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ExceptAll</span><span class="op">&lt;</span><span class="ident">Source</span>, <span class="ident">Rhs</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CombinationClause</span><span class="op">&lt;</span>
+        <span class="ident">combination_clause::Except</span>,
+        <span class="ident">combination_clause::All</span>,
+        <span class="op">&lt;</span><span class="ident">Source</span> <span class="kw">as</span> <span class="ident">CombineDsl</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+        <span class="op">&lt;</span><span class="ident">Rhs</span> <span class="kw">as</span> <span class="ident">AsQuery</span><span class="op">&gt;</span><span class="ident">::Query</span>,
+    <span class="op">&gt;</span>;
+
+    <span class="kw">type</span> <span class="ident">JoinQuerySource</span><span class="op">&lt;</span><span class="ident">Left</span>, <span class="ident">Right</span>, <span class="ident">Kind</span>, <span class="ident">On</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">joins::JoinOn</span><span class="op">&lt;</span><span class="ident">joins::Join</span><span class="op">&lt;</span><span class="ident">Left</span>, <span class="ident">Right</span>, <span class="ident">Kind</span><span class="op">&gt;</span>, <span class="ident">On</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// A query source representing the inner join between two tables.</span>
+    <span class="doccomment">/// For example, for the inner join between three tables that implement `JoinTo`:</span>
+    <span class="doccomment">/// `InnerJoinQuerySource&lt;InnerJoinQuerySource&lt;table1, table2&gt;, table3&gt;`</span>
+    <span class="doccomment">/// Which conveniently lets you omit the exact join condition.</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">InnerJoinQuerySource</span><span class="op">&lt;</span><span class="ident">Left</span>, <span class="ident">Right</span>, <span class="ident">On</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Left</span> <span class="kw">as</span> <span class="ident">joins::JoinTo</span><span class="op">&lt;</span><span class="ident">Right</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::OnClause</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="ident">JoinQuerySource</span><span class="op">&lt;</span><span class="ident">Left</span>, <span class="ident">Right</span>, <span class="ident">joins::Inner</span>, <span class="ident">On</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// A query source representing the left outer join between two tables.</span>
+    <span class="doccomment">/// For example, for the left join between three tables that implement `JoinTo`:</span>
+    <span class="doccomment">/// `LeftJoinQuerySource&lt;LeftJoinQuerySource&lt;table1, table2&gt;, table3&gt;`</span>
+    <span class="doccomment">/// Which conveniently lets you omit the exact join condition.</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LeftJoinQuerySource</span><span class="op">&lt;</span><span class="ident">Left</span>, <span class="ident">Right</span>, <span class="ident">On</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Left</span> <span class="kw">as</span> <span class="ident">joins::JoinTo</span><span class="op">&lt;</span><span class="ident">Right</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::OnClause</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="ident">JoinQuerySource</span><span class="op">&lt;</span><span class="ident">Left</span>, <span class="ident">Right</span>, <span class="ident">joins::LeftOuter</span>, <span class="ident">On</span><span class="op">&gt;</span>;
+
+    <span class="doccomment">/// [`Iterator`](std::iter::Iterator) of [`QueryResult&lt;U&gt;`](crate::result::QueryResult)</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// See [`RunQueryDsl::load_iter`] for more information</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LoadIter</span><span class="op">&lt;</span><span class="lifetime">&#39;conn</span>, <span class="lifetime">&#39;query</span>, <span class="ident">Q</span>, <span class="ident">Conn</span>, <span class="ident">U</span>, <span class="ident">B</span> <span class="op">=</span> <span class="ident">DefaultLoadingMode</span><span class="op">&gt;</span> <span class="op">=</span>
+        <span class="op">&lt;</span><span class="ident">Q</span> <span class="kw">as</span> <span class="ident">load_dsl::LoadQueryGatWorkaround</span><span class="op">&lt;</span><span class="lifetime">&#39;conn</span>, <span class="lifetime">&#39;query</span>, <span class="ident">Conn</span>, <span class="ident">U</span>, <span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Ret</span>;
+
+    <span class="doccomment">/// Maps `F` to `Alias&lt;S&gt;`</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Any column `F` that belongs to `S::Table` will be transformed into</span>
+    <span class="doccomment">/// [`AliasedField&lt;S, Self&gt;`](crate::query_source::AliasedField)</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Any column `F` that does not belong to `S::Table` will be left untouched.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// This also works with tuples and some expressions.</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">AliasedFields</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">F</span> <span class="kw">as</span> <span class="ident">aliasing::FieldAliasMapper</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Out</span>;
+}
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">prelude</span> {
+    <span class="doccomment">//! Re-exports important traits and types. Meant to be glob imported when using Diesel.</span>
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::associations</span>::{<span class="ident">Associations</span>, <span class="ident">GroupedBy</span>, <span class="ident">Identifiable</span>};
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::connection::Connection</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::deserialize</span>::{<span class="ident">Queryable</span>, <span class="ident">QueryableByName</span>};
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::expression</span>::{
+        <span class="ident">AppearsOnTable</span>, <span class="ident">BoxableExpression</span>, <span class="ident">Expression</span>, <span class="ident">IntoSql</span>, <span class="ident">Selectable</span>, <span class="ident">SelectableExpression</span>,
+    };
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::expression::functions::sql_function</span>;
+
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::expression::SelectableHelper</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::expression_methods</span>::<span class="kw-2">*</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::insertable::Insertable</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::macros::prelude</span>::<span class="kw-2">*</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_builder::AsChangeset</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_builder::DecoratableTarget</span>;
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_dsl</span>::{
+        <span class="ident">BelongingToDsl</span>, <span class="ident">CombineDsl</span>, <span class="ident">JoinOnDsl</span>, <span class="ident">QueryDsl</span>, <span class="ident">RunQueryDsl</span>, <span class="ident">SaveChangesDsl</span>,
+    };
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_source</span>::{<span class="ident">Column</span>, <span class="ident">JoinTo</span>, <span class="ident">QuerySource</span>, <span class="ident">Table</span>};
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::result</span>::{<span class="ident">ConnectionError</span>, <span class="ident">ConnectionResult</span>, <span class="ident">OptionalExtension</span>, <span class="ident">QueryResult</span>};
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;mysql&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::mysql::MysqlConnection</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;postgres&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::pg::PgConnection</span>;
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;sqlite&quot;</span>)]</span>
+    <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sqlite::SqliteConnection</span>;
+}
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::prelude</span>::<span class="kw-2">*</span>;
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_builder::debug_query</span>;
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">inline</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::query_builder::functions</span>::{
+    <span class="ident">delete</span>, <span class="ident">insert_into</span>, <span class="ident">insert_or_ignore_into</span>, <span class="ident">replace_into</span>, <span class="ident">select</span>, <span class="ident">sql_query</span>, <span class="ident">update</span>,
+};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::result::Error::NotFound</span>;
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">diesel</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+}
+
+<span class="comment">// workaround https://github.com/rust-lang/rust/pull/52234</span>
+<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">__diesel_check_column_count_internal</span> <span class="kw">as</span> <span class="ident">__diesel_check_column_count</span>;
+</code></pre></div>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (62b272d25 2022-07-21)" ></div>
+</body></html>

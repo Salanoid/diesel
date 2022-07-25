@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":[["exists","Creates a SQL `EXISTS` expression."]],"struct":[["Exists","The query dsl node that represents a SQL `EXISTS (subselect)` expression."]]};

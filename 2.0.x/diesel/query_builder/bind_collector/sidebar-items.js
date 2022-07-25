@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ByteWrapper","A type wrapper for raw bytes"],["RawBytesBindCollector","A bind collector used by backends which transmit bind parameters as an opaque blob of bytes."]],"trait":[["BindCollector","A type which manages serializing bind parameters during query construction."]]};

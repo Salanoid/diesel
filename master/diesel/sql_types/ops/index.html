@@ -1,0 +1,39 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Represents the output of numeric operators in SQL"><meta name="keywords" content="rust, rustlang, rust-lang, ops"><title>diesel::sql_types::ops - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script defer src="../../../main.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module ops</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#traits">Traits</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../diesel/index.html"><img class="rust-logo" src="../../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../../index.html">diesel</a>::<wbr><a href="../index.html">sql_types</a>::<wbr><a class="mod" href="#">ops</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../../src/diesel/sql_types/ops.rs.html#1-184">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Represents the output of numeric operators in SQL</p>
+<p>Apps should not need to concern themselves with this module.
+If you are looking for where the actual implementation of <code>std::ops::Add</code>
+and friends are generated for columns, see
+<a href="../../macro.numeric_expr.html"><code>numeric_expr!</code></a>.</p>
+<p>Crates which add new types which allow numeric operators should implement
+these traits to specify what the output is for a given right hand side.</p>
+<p>Unlike the traits in <code>std::ops</code>, the right hand side is an associated type
+rather than a type parameter. The biggest drawback of this is that any type
+can only have one right hand type which can be added/subtracted, etc. The
+most immediately noticeable effect of this is that you cannot add a nullable
+number to one that is not nullable.</p>
+<p>The reason for this is because of the impl of <code>std::ops::Add</code> that we need
+to be able to write. We want the right hand side to allow Rust values which
+should be sent as bind parameters, not just other Diesel expressions. That
+means the impl would look like this:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ST</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">std::ops::Add</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">my_column</span>
+<span class="kw">where</span>
+    <span class="ident">T</span>: <span class="ident">AsExpression</span><span class="op">&lt;</span><span class="ident">ST</span><span class="op">&gt;</span>,
+    <span class="ident">my_column::SqlType</span>: <span class="ident">diesel::ops::Add</span><span class="op">&lt;</span><span class="ident">ST</span><span class="op">&gt;</span>,</code></pre></div>
+<p>This impl is not valid in Rust, as <code>ST</code> is not constrained by the trait or
+the implementing type. If there were two valid types for <code>ST</code> which
+satisfied all constraints, Rust would not know which one to use, and there
+would be no way for the user to specify which one should be used.</p>
+</div></details><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Add.html" title="diesel::sql_types::ops::Add trait">Add</a></div><div class="item-right docblock-short"><p>Represents SQL types which can be added.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Div.html" title="diesel::sql_types::ops::Div trait">Div</a></div><div class="item-right docblock-short"><p>Represents SQL types which can be divided.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Mul.html" title="diesel::sql_types::ops::Mul trait">Mul</a></div><div class="item-right docblock-short"><p>Represents SQL types which can be multiplied.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.Sub.html" title="diesel::sql_types::ops::Sub trait">Sub</a></div><div class="item-right docblock-short"><p>Represents SQL types which can be subtracted.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (7fe022f5a 2022-07-24)" ></div>
+</body></html>

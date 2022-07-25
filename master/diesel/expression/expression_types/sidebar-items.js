@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["NotSelectable","Query nodes witch cannot be part of a select clause."],["Untyped","Query nodes with this expression type do not have a statically at compile time known expression type."]]};

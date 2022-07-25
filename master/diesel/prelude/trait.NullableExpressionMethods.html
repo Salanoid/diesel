@@ -1,0 +1,115 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Methods present on all expressions"><meta name="keywords" content="rust, rustlang, rust-lang, NullableExpressionMethods"><title>NullableExpressionMethods in diesel::prelude - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">NullableExpressionMethods</a></h2><div class="sidebar-elems"><section><div class="block"><h3 class="sidebar-title"><a href="#provided-methods">Provided Methods</a></h3><ul><li><a href="#method.assume_not_null">assume_not_null</a></li><li><a href="#method.nullable">nullable</a></li></ul></div><div class="block"><h3 class="sidebar-title"><a href="#implementors">Implementors</a></h3></div></section><h2 class="location"><a href="index.html">In diesel::prelude</a></h2></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../diesel/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Trait <a href="../index.html">diesel</a>::<wbr><a href="index.html">prelude</a>::<wbr><a class="trait" href="#">NullableExpressionMethods</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/diesel/expression_methods/global_expression_methods.rs.html#455-611">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><pre class="rust trait"><code>pub trait NullableExpressionMethods: <a class="trait" href="trait.Expression.html" title="trait diesel::prelude::Expression">Expression</a> + <a class="trait" href="https://doc.rust-lang.org/nightly/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a> {
+    fn <a href="#method.nullable" class="fnname">nullable</a>(self) -&gt; <a class="type" href="../dsl/type.Nullable.html" title="type diesel::dsl::Nullable">Nullable</a>&lt;Self&gt; { ... }
+<span class="item-spacer"></span>    fn <a href="#method.assume_not_null" class="fnname">assume_not_null</a>(self) -&gt; <a class="type" href="../dsl/type.AssumeNotNull.html" title="type diesel::dsl::AssumeNotNull">AssumeNotNull</a>&lt;Self&gt; { ... }
+}</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Methods present on all expressions</p>
+</div></details><h2 id="provided-methods" class="small-section-header">Provided Methods<a href="#provided-methods" class="anchor"></a></h2><div class="methods"><details class="rustdoc-toggle" open><summary><div id="method.nullable" class="method has-srclink"><div class="rightside"><a class="srclink" href="../../src/diesel/expression_methods/global_expression_methods.rs.html#490-492">source</a></div><h4 class="code-header">fn <a href="#method.nullable" class="fnname">nullable</a>(self) -&gt; <a class="type" href="../dsl/type.Nullable.html" title="type diesel::dsl::Nullable">Nullable</a>&lt;Self&gt;</h4></div></summary><div class="docblock"><p>Converts this potentially non-null expression into one which is treated
+as nullable. This method has no impact on the generated SQL, and is only
+used to allow certain comparisons that would otherwise fail to compile.</p>
+<h5 id="example"><a href="#example">Example</a></h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">table!</span> {
+    <span class="ident">posts</span> {
+        <span class="ident">id</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">user_id</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">author_name</span> -&gt; <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">VarChar</span><span class="op">&gt;</span>,
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::users::dsl</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::posts::dsl</span>::{<span class="ident">posts</span>, <span class="ident">author_name</span>};
+    <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">establish_connection</span>();
+
+    <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">users</span>.<span class="ident">inner_join</span>(<span class="ident">posts</span>)
+        .<span class="ident">filter</span>(<span class="ident">name</span>.<span class="ident">nullable</span>().<span class="ident">eq</span>(<span class="ident">author_name</span>))
+        .<span class="ident">select</span>(<span class="ident">name</span>)
+        .<span class="ident">load</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>(<span class="ident">connection</span>);
+    <span class="macro">println!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">data</span>);
+}</code></pre></div>
+</div></details><details class="rustdoc-toggle" open><summary><div id="method.assume_not_null" class="method has-srclink"><div class="rightside"><a class="srclink" href="../../src/diesel/expression_methods/global_expression_methods.rs.html#608-610">source</a></div><h4 class="code-header">fn <a href="#method.assume_not_null" class="fnname">assume_not_null</a>(self) -&gt; <a class="type" href="../dsl/type.AssumeNotNull.html" title="type diesel::dsl::AssumeNotNull">AssumeNotNull</a>&lt;Self&gt;</h4></div></summary><div class="docblock"><p>Converts this potentially nullable expression into one which will be <strong>assumed</strong>
+to be not-null. This method has no impact on the generated SQL, however it will
+enable you to attempt deserialization of the returned value in a non-<code>Option</code>.</p>
+<p>This is meant to cover for cases where you know that given the <code>WHERE</code> clause
+the field returned by the database will never be <code>NULL</code>.</p>
+<p>This <strong>will cause runtime errors</strong> on <code>load()</code> if the “assume” turns out to be incorrect.</p>
+<h5 id="examples"><a href="#examples">Examples</a></h5><h6 id="normal-usage"><a href="#normal-usage">Normal usage</a></h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">table!</span> {
+    <span class="ident">animals</span> {
+        <span class="ident">id</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">species</span> -&gt; <span class="ident">VarChar</span>,
+        <span class="ident">legs</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">name</span> -&gt; <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">VarChar</span><span class="op">&gt;</span>,
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::animals::dsl</span>::<span class="kw-2">*</span>;
+    <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">establish_connection</span>();
+
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">animals</span>
+        .<span class="ident">filter</span>(<span class="ident">name</span>.<span class="ident">is_not_null</span>())
+        .<span class="ident">select</span>(<span class="ident">name</span>.<span class="ident">assume_not_null</span>())
+        .<span class="ident">load</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>(<span class="ident">connection</span>);
+    <span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">is_ok</span>());
+}</code></pre></div>
+<h6 id="incorrect-usage"><a href="#incorrect-usage">Incorrect usage</a></h6>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">table!</span> {
+    <span class="ident">animals</span> {
+        <span class="ident">id</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">species</span> -&gt; <span class="ident">VarChar</span>,
+        <span class="ident">legs</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">name</span> -&gt; <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">VarChar</span><span class="op">&gt;</span>,
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">use</span> <span class="ident">diesel::result</span>::{<span class="ident">Error</span>, <span class="ident">UnexpectedNullError</span>};
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::animals::dsl</span>::<span class="kw-2">*</span>;
+    <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">establish_connection</span>();
+
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">animals</span>
+        .<span class="ident">select</span>(<span class="ident">name</span>.<span class="ident">assume_not_null</span>())
+        .<span class="ident">load</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>(<span class="ident">connection</span>);
+    <span class="macro">assert!</span>(<span class="macro">matches!</span>(
+        <span class="ident">result</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">Error::DeserializationError</span>(<span class="ident">err</span>)) <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">is</span>::<span class="op">&lt;</span><span class="ident">UnexpectedNullError</span><span class="op">&gt;</span>()
+    ));
+}</code></pre></div>
+<h6 id="advanced-usage---use-only-if-youre-sure-you-know-what-youre-doing"><a href="#advanced-usage---use-only-if-youre-sure-you-know-what-youre-doing">Advanced usage - use only if you’re sure you know what you’re doing!</a></h6>
+<p>This will cause the <code>Option</code> to be <code>None</code> where the <code>left_join</code> succeeded but the
+<code>author_name</code> turned out to be <code>NULL</code>, due to how <code>Option</code> deserialization works.
+(see <a href="trait.Queryable.html"><code>Queryable</code> documentation</a>)</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">table!</span> {
+    <span class="ident">posts</span> {
+        <span class="ident">id</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">user_id</span> -&gt; <span class="ident">Integer</span>,
+        <span class="ident">author_name</span> -&gt; <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Text</span><span class="op">&gt;</span>,
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::posts</span>;
+    <span class="kw">use</span> <span class="ident"><span class="self">self</span>::users</span>;
+    <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">establish_connection</span>();
+
+
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">posts::table</span>.<span class="ident">left_join</span>(<span class="ident">users::table</span>)
+        .<span class="ident">select</span>((<span class="ident">posts::id</span>, (<span class="ident">users::id</span>, <span class="ident">posts::author_name</span>.<span class="ident">assume_not_null</span>()).<span class="ident">nullable</span>()))
+        .<span class="ident">order_by</span>(<span class="ident">posts::id</span>)
+        .<span class="ident">load</span>::<span class="op">&lt;</span>(<span class="ident">i32</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">i32</span>, <span class="ident">String</span>)<span class="op">&gt;</span>)<span class="op">&gt;</span>(<span class="ident">connection</span>);
+    <span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[
+        (<span class="number">1</span>, <span class="prelude-val">Some</span>((<span class="number">1</span>, <span class="string">&quot;Sean&quot;</span>.<span class="ident">to_owned</span>()))),
+        (<span class="number">2</span>, <span class="prelude-val">Some</span>((<span class="number">1</span>, <span class="string">&quot;Sean&quot;</span>.<span class="ident">to_owned</span>()))),
+        (<span class="number">3</span>, <span class="prelude-val">None</span>),
+    ]);
+    <span class="macro">assert_eq!</span>(<span class="ident">expected</span>, <span class="ident">result</span>);
+}</code></pre></div>
+</div></details></div><h2 id="implementors" class="small-section-header">Implementors<a href="#implementors" class="anchor"></a></h2><div class="item-list" id="implementors-list"><section id="impl-NullableExpressionMethods-for-T" class="impl has-srclink"><span class="rightside"><a class="srclink" href="../../src/diesel/expression_methods/global_expression_methods.rs.html#613">source</a></span><a href="#impl-NullableExpressionMethods-for-T" class="anchor"></a><h3 class="code-header in-band">impl&lt;T:&nbsp;<a class="trait" href="trait.Expression.html" title="trait diesel::prelude::Expression">Expression</a>&gt; <a class="trait" href="../expression_methods/trait.NullableExpressionMethods.html" title="trait diesel::expression_methods::NullableExpressionMethods">NullableExpressionMethods</a> for T</h3></section></div><script type="text/javascript" src="../../implementors/diesel/expression_methods/global_expression_methods/trait.NullableExpressionMethods.js" data-ignore-extern-crates="" async></script></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (7fe022f5a 2022-07-24)" ></div>
+</body></html>

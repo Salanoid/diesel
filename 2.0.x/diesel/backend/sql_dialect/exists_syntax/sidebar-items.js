@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["AnsiSqlExistsSyntax","Indicates that this backend treats `EXIST()` as function like expression"]]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["MysqlTime","Corresponding rust representation of the MYSQL_TIME struct from libmysqlclient"],["MysqlTimestampType","Rust representation of enum_mysql_timestamp_type"]]};

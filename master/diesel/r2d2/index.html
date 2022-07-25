@@ -1,0 +1,101 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Connection pooling via r2d2."><meta name="keywords" content="rust, rustlang, rust-lang, r2d2"><title>diesel::r2d2 - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc mod"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Module r2d2</a></h2><div class="sidebar-elems"><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#enums">Enums</a></li><li><a href="#traits">Traits</a></li><li><a href="#types">Type Definitions</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../diesel/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Module <a href="../index.html">diesel</a>::<wbr><a class="mod" href="#">r2d2</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/diesel/r2d2.rs.html#1-531">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><span class="item-info"><div class="stab portability">Available on <strong>crate feature <code>r2d2</code></strong> only.</div></span><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Connection pooling via r2d2.</p>
+<p>Note: This module requires enabling the <code>r2d2</code> feature</p>
+<h2 id="example"><a href="#example">Example</a></h2>
+<p>The below snippet is a contrived example emulating a web application,
+where one would first initialize the pool in the <code>main()</code> function
+(at the start of a long-running process). One would then pass this
+pool struct around as shared state, which, here, we’ve emulated using
+threads instead of routes.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">diesel::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">diesel::r2d2::ConnectionManager</span>;
+<span class="kw">use</span> <span class="ident">diesel::r2d2::Pool</span>;
+<span class="kw">use</span> <span class="ident">diesel::result::Error</span>;
+<span class="kw">use</span> <span class="ident">std::thread</span>;
+
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_connection_pool</span>() -&gt; <span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">ConnectionManager</span><span class="op">&lt;</span><span class="ident">DbConnection</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">url</span> <span class="op">=</span> <span class="ident">database_url_for_env</span>();
+    <span class="kw">let</span> <span class="ident">manager</span> <span class="op">=</span> <span class="ident">ConnectionManager</span>::<span class="op">&lt;</span><span class="ident">DbConnection</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">url</span>);
+    <span class="comment">// Refer to the `r2d2` documentation for more methods to use</span>
+    <span class="comment">// when building a connection pool</span>
+    <span class="ident">Pool::builder</span>()
+        .<span class="ident">test_on_check_out</span>(<span class="bool-val">true</span>)
+        .<span class="ident">build</span>(<span class="ident">manager</span>)
+        .<span class="ident">expect</span>(<span class="string">&quot;Could not build connection pool&quot;</span>)
+}
+
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_user</span>(<span class="ident">conn</span>: <span class="kw-2">&amp;mut</span> <span class="ident">DbConnection</span>, <span class="ident">user_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">use</span> <span class="ident">schema::users::dsl</span>::<span class="kw-2">*</span>;
+
+    <span class="ident">diesel::insert_into</span>(<span class="ident">users</span>)
+        .<span class="ident">values</span>(<span class="ident">name</span>.<span class="ident">eq</span>(<span class="ident">user_name</span>))
+        .<span class="ident">execute</span>(<span class="ident">conn</span>)
+}
+
+<span class="kw">fn</span> <span class="ident">main</span>() {
+    <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">get_connection_pool</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">threads</span> <span class="op">=</span> <span class="macro">vec!</span>[];
+    <span class="kw">let</span> <span class="ident">max_users_to_create</span> <span class="op">=</span> <span class="number">1</span>;
+
+    <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">max_users_to_create</span> {
+        <span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">clone</span>();
+        <span class="ident">threads</span>.<span class="ident">push</span>(<span class="ident">thread::spawn</span>({
+            <span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
+                <span class="kw">let</span> <span class="ident">conn</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">pool</span>.<span class="ident">get</span>().<span class="ident">unwrap</span>();
+                <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;Person {}&quot;</span>, <span class="ident">i</span>);
+                <span class="ident">create_user</span>(<span class="ident">conn</span>, <span class="kw-2">&amp;</span><span class="ident">name</span>).<span class="ident">unwrap</span>();
+            }
+        }))
+    }
+
+    <span class="kw">for</span> <span class="ident">handle</span> <span class="kw">in</span> <span class="ident">threads</span> {
+        <span class="ident">handle</span>.<span class="ident">join</span>().<span class="ident">unwrap</span>();
+    }
+}</code></pre></div>
+<h2 id="a-note-on-error-handling"><a href="#a-note-on-error-handling">A note on error handling</a></h2>
+<p>When used inside a pool, if an individual connection becomes
+broken (as determined by the <a href="trait.R2D2Connection.html#method.is_broken" title="R2D2Connection::is_broken">R2D2Connection::is_broken</a> method)
+then, when the connection goes out of scope, <code>r2d2</code> will close
+and return the connection to the DB.</p>
+<p><code>diesel</code> determines broken connections by whether or not the current
+thread is panicking or if individual <code>Connection</code> structs are
+broken (determined by the <code>is_broken()</code> method). Generically, these
+are left to individual backends to implement themselves.</p>
+<p>For SQLite, PG, and MySQL backends <code>is_broken()</code> is determined
+by whether or not the <code>TransactionManagerStatus</code> (as a part
+of the <code>AnsiTransactionManager</code> struct) is in an <code>InError</code> state
+or contains an open transaction when the connection goes out of scope.</p>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="event/index.html" title="diesel::r2d2::event mod">event</a></div><div class="item-right docblock-short"><p>Event subscriptions.</p>
+</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Builder.html" title="diesel::r2d2::Builder struct">Builder</a></div><div class="item-right docblock-short"><p>A builder for a connection pool.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.ConnectionManager.html" title="diesel::r2d2::ConnectionManager struct">ConnectionManager</a></div><div class="item-right docblock-short"><p>An r2d2 connection manager for use with Diesel.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Error.html" title="diesel::r2d2::Error struct">Error</a></div><div class="item-right docblock-short"><p>The error type returned by methods in this crate.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Extensions.html" title="diesel::r2d2::Extensions struct">Extensions</a></div><div class="item-right docblock-short"><p>A “type map” used to associate data with pooled connections.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.LoggingErrorHandler.html" title="diesel::r2d2::LoggingErrorHandler struct">LoggingErrorHandler</a></div><div class="item-right docblock-short"><p>A <code>HandleError</code> implementation which logs at the error level.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.NopConnectionCustomizer.html" title="diesel::r2d2::NopConnectionCustomizer struct">NopConnectionCustomizer</a></div><div class="item-right docblock-short"><p>A <code>CustomizeConnection</code> which does nothing.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.NopErrorHandler.html" title="diesel::r2d2::NopErrorHandler struct">NopErrorHandler</a></div><div class="item-right docblock-short"><p>A <code>HandleError</code> implementation which does nothing.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.NopEventHandler.html" title="diesel::r2d2::NopEventHandler struct">NopEventHandler</a></div><div class="item-right docblock-short"><p>A <code>HandleEvent</code> implementation which does nothing.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Pool.html" title="diesel::r2d2::Pool struct">Pool</a></div><div class="item-right docblock-short"><p>A generic connection pool.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.PooledConnection.html" title="diesel::r2d2::PooledConnection struct">PooledConnection</a></div><div class="item-right docblock-short"><p>A smart pointer wrapping a connection.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.State.html" title="diesel::r2d2::State struct">State</a></div><div class="item-right docblock-short"><p>Information about the state of a <code>Pool</code>.</p>
+</div></div></div><h2 id="enums" class="small-section-header"><a href="#enums">Enums</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="enum" href="enum.Error.html" title="diesel::r2d2::Error enum">Error</a></div><div class="item-right docblock-short"><p>The error used when managing connections with <code>r2d2</code>.</p>
+</div></div></div><h2 id="traits" class="small-section-header"><a href="#traits">Traits</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.CustomizeConnection.html" title="diesel::r2d2::CustomizeConnection trait">CustomizeConnection</a></div><div class="item-right docblock-short"><p>A trait which allows for customization of connections.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.HandleError.html" title="diesel::r2d2::HandleError trait">HandleError</a></div><div class="item-right docblock-short"><p>A trait which handles errors reported by the <code>ManageConnection</code>.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.HandleEvent.html" title="diesel::r2d2::HandleEvent trait">HandleEvent</a></div><div class="item-right docblock-short"><p>A trait which is provided with information about events in a connection pool.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.ManageConnection.html" title="diesel::r2d2::ManageConnection trait">ManageConnection</a></div><div class="item-right docblock-short"><p>A trait which provides connection-specific functionality.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.R2D2Connection.html" title="diesel::r2d2::R2D2Connection trait">R2D2Connection</a></div><div class="item-right docblock-short"><p>A trait indicating a connection could be used inside a r2d2 pool</p>
+</div></div></div><h2 id="types" class="small-section-header"><a href="#types">Type Definitions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="type" href="type.PoolError.html" title="diesel::r2d2::PoolError type">PoolError</a></div><div class="item-right docblock-short"><p>A re-export of <a href="struct.Error.html"><code>r2d2::Error</code></a>, which is only used by methods on <a href="struct.Pool.html"><code>r2d2::Pool</code></a>.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (7fe022f5a 2022-07-24)" ></div>
+</body></html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Diesel dynamic schema"><meta name="keywords" content="rust, rustlang, rust-lang, diesel_dynamic_schema"><title>diesel_dynamic_schema - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="../crates.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../diesel_dynamic_schema/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../diesel_dynamic_schema/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"><a href="#">Crate diesel_dynamic_schema</a></h2><div class="sidebar-elems"><div class="block"><ul><li class="version">Version 0.2.0-rc.1</li><li><a id="all-types" href="all.html">All Items</a></li></ul></div><section><div class="block"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#functions">Functions</a></li></ul></div></section></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../diesel_dynamic_schema/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">diesel_dynamic_schema</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/diesel_dynamic_schema/lib.rs.html#1-124">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="diesel-dynamic-schema"><a href="#diesel-dynamic-schema">Diesel dynamic schema</a></h2>
+<p>Diesel is an ORM and query builder designed to reduce
+the boilerplate for database interactions.</p>
+<p>If this is your first time reading about Diesel, then
+we recommend you start with the <a href="https://diesel.rs/guides/getting-started/">getting started guide</a>.
+We also have <a href="https://diesel.rs/guides">many other long form guides</a>.</p>
+<p>Diesel is built to provide strong compile time guarantees that your
+queries are valid. To do this, it needs to represent your schema
+at compile time. However, there are some times where you don’t
+actually know the schema you’re interacting with until runtime.</p>
+<p>This crate provides tools to work with those cases, while still being
+able to use Diesel’s query builder. Keep in mind that many compile time
+guarantees are lost. We cannot verify that the tables/columns you ask
+for actually exist, or that the types you state are correct.</p>
+<h2 id="getting-started"><a href="#getting-started">Getting Started</a></h2>
+<p>The <code>table</code> function is used to create a new Diesel table.
+Note that you must always provide an explicit select clause
+when using this crate.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="comment">// Use diesel-dynamic-schema to create a table and columns.</span>
+<span class="kw">let</span> <span class="ident">users</span> <span class="op">=</span> <span class="ident">table</span>(<span class="string">&quot;users&quot;</span>);
+<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">users</span>.<span class="ident">column</span>::<span class="op">&lt;</span><span class="ident">Integer</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="string">&quot;id&quot;</span>);
+<span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">users</span>.<span class="ident">column</span>::<span class="op">&lt;</span><span class="ident">Text</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="string">&quot;name&quot;</span>);
+
+<span class="comment">// Now you can use typical Diesel syntax; see the Diesel docs for more.</span>
+<span class="kw">let</span> <span class="ident">results</span> <span class="op">=</span> <span class="ident">users</span>
+    .<span class="ident">select</span>((<span class="ident">id</span>, <span class="ident">name</span>))
+    .<span class="ident">filter</span>(<span class="ident">name</span>.<span class="ident">eq</span>(<span class="string">&quot;Sean&quot;</span>))
+    .<span class="ident">load</span>::<span class="op">&lt;</span>(<span class="ident">i32</span>, <span class="ident">String</span>)<span class="op">&gt;</span>(<span class="ident">conn</span>)<span class="question-mark">?</span>;
+
+<span class="kw">for</span> (<span class="ident">id</span>, <span class="ident">name</span>) <span class="kw">in</span> <span class="ident">results</span> {
+    <span class="macro">println!</span>(<span class="string">&quot;id:{} name:{}&quot;</span>, <span class="ident">id</span>, <span class="ident">name</span>);
+}</code></pre></div>
+<p>See the <code>/examples</code> directory for runnable code examples.</p>
+<h3 id="getting-help"><a href="#getting-help">Getting help</a></h3>
+<p>If you run into problems, Diesel has a very active Gitter room.
+You can come ask for help at
+<a href="https://gitter.im/diesel-rs/diesel">gitter.im/diesel-rs/diesel</a></p>
+</div></details><h2 id="modules" class="small-section-header"><a href="#modules">Modules</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="dynamic_value/index.html" title="diesel_dynamic_schema::dynamic_value mod">dynamic_value</a></div><div class="item-right docblock-short"><p>This module provides a container that allows to receive a dynamically
+specified number of fields from the database.</p>
+</div></div></div><h2 id="structs" class="small-section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Column.html" title="diesel_dynamic_schema::Column struct">Column</a></div><div class="item-right docblock-short"><p>A database table column.
+This type is created by the <a href="struct.Table.html#method.column"><code>column</code></a> function.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.DynamicSelectClause.html" title="diesel_dynamic_schema::DynamicSelectClause struct">DynamicSelectClause</a></div><div class="item-right docblock-short"><p>Represents a dynamically sized select clause</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Schema.html" title="diesel_dynamic_schema::Schema struct">Schema</a></div><div class="item-right docblock-short"><p>A database schema.
+This type is created by the <a href="fn.schema.html"><code>schema</code></a> function.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Table.html" title="diesel_dynamic_schema::Table struct">Table</a></div><div class="item-right docblock-short"><p>A database table.
+This type is created by the <a href="fn.table.html"><code>table</code></a> function.</p>
+</div></div></div><h2 id="functions" class="small-section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.schema.html" title="diesel_dynamic_schema::schema fn">schema</a></div><div class="item-right docblock-short"><p>Create a new <a href="struct.Schema.html" title="Schema"><code>Schema</code></a> with the given name.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.table.html" title="diesel_dynamic_schema::table fn">table</a></div><div class="item-right docblock-short"><p>Create a new <a href="struct.Table.html" title="Table"><code>Table</code></a> with the given name.</p>
+</div></div></div></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="diesel_dynamic_schema" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (7fe022f5a 2022-07-24)" ></div>
+</body></html>

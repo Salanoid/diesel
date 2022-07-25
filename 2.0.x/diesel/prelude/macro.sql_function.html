@@ -1,0 +1,214 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Declare a sql function for use in your code."><meta name="keywords" content="rust, rustlang, rust-lang, sql_function"><title>sql_function in diesel::prelude - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc macro"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div>
+        </a><div class="sidebar-elems"><h2 class="location"><a href="index.html">In diesel::prelude</a></h2></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../diesel/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Macro <a href="../index.html">diesel</a>::<wbr><a href="index.html">prelude</a>::<wbr><a class="macro" href="#">sql_function</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../../src/diesel_derives/lib.rs.html#1300">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><pre class="rust macro"><code>sql_function!() { /* proc-macro */ }</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Declare a sql function for use in your code.</p>
+<p>Diesel only provides support for a very small number of SQL functions.
+This macro enables you to add additional functions from the SQL standard,
+as well as any custom functions your application might have.</p>
+<p>The syntax for this macro is very similar to that of a normal Rust function,
+except the argument and return types will be the SQL types being used.
+Typically these types will come from <a href="../diesel/sql_types/index.html"><code>diesel::sql_types</code></a></p>
+<p>This macro will generate two items. A function with the name that you’ve
+given, and a module with a helper type representing the return type of your
+function. For example, this invocation:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="macro">sql_function!</span>(<span class="kw">fn</span> <span class="ident">lower</span>(<span class="ident">x</span>: <span class="ident">Text</span>) -&gt; <span class="ident">Text</span>);</code></pre></div>
+<p>will generate this code:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lower</span><span class="op">&lt;</span><span class="ident">X</span><span class="op">&gt;</span>(<span class="ident">x</span>: <span class="ident">X</span>) -&gt; <span class="ident">lower::HelperType</span><span class="op">&lt;</span><span class="ident">X</span><span class="op">&gt;</span> {
+    ...
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">lower</span> {
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">HelperType</span><span class="op">&lt;</span><span class="ident">X</span><span class="op">&gt;</span> <span class="op">=</span> ...;
+}</code></pre></div>
+<p>If you are using this macro for part of a library, where the function is
+part of your public API, it is highly recommended that you re-export this
+helper type with the same name as your function. This is the standard
+structure:</p>
+
+<div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">functions</span> {
+    <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::types</span>::<span class="kw-2">*</span>;
+    <span class="kw">use</span> <span class="ident">diesel::sql_types</span>::<span class="kw-2">*</span>;
+
+    <span class="macro">sql_function!</span> {
+        <span class="doccomment">/// Represents the Pg `LENGTH` function used with `tsvector`s.</span>
+        <span class="kw">fn</span> <span class="ident">length</span>(<span class="ident">x</span>: <span class="ident">TsVector</span>) -&gt; <span class="ident">Integer</span>;
+    }
+}
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">helper_types</span> {
+    <span class="doccomment">/// The return type of `length(expr)`</span>
+    <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Length</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">functions::length::HelperType</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&gt;</span>;
+}
+
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">dsl</span> {
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">functions</span>::<span class="kw-2">*</span>;
+    <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">helper_types</span>::<span class="kw-2">*</span>;
+}</code></pre></div>
+<p>Most attributes given to this macro will be put on the generated function
+(including doc comments).</p>
+<h2 id="adding-doc-comments"><a href="#adding-doc-comments">Adding Doc Comments</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">diesel::sql_types::Text</span>;
+
+<span class="macro">sql_function!</span> {
+    <span class="doccomment">/// Represents the `canon_crate_name` SQL function, created in</span>
+    <span class="doccomment">/// migration ....</span>
+    <span class="kw">fn</span> <span class="ident">canon_crate_name</span>(<span class="ident">a</span>: <span class="ident">Text</span>) -&gt; <span class="ident">Text</span>;
+}
+
+<span class="kw">let</span> <span class="ident">target_name</span> <span class="op">=</span> <span class="string">&quot;diesel&quot;</span>;
+<span class="ident">crates</span>.<span class="ident">filter</span>(<span class="ident">canon_crate_name</span>(<span class="ident">name</span>).<span class="ident">eq</span>(<span class="ident">canon_crate_name</span>(<span class="ident">target_name</span>)));
+<span class="comment">// This will generate the following SQL</span>
+<span class="comment">// SELECT * FROM crates WHERE canon_crate_name(crates.name) = canon_crate_name($1)</span></code></pre></div>
+<h2 id="special-attributes"><a href="#special-attributes">Special Attributes</a></h2>
+<p>There are a handful of special attributes that Diesel will recognize. They
+are:</p>
+<ul>
+<li><code>#[aggregate]</code>
+<ul>
+<li>Indicates that this is an aggregate function, and that <code>NonAggregate</code>
+should not be implemented.</li>
+</ul>
+</li>
+<li><code>#[sql_name = &quot;name&quot;]</code>
+<ul>
+<li>The SQL to be generated is different than the Rust name of the function.
+This can be used to represent functions which can take many argument
+types, or to capitalize function names.</li>
+</ul>
+</li>
+</ul>
+<p>Functions can also be generic. Take the definition of <code>sum</code> for an example
+of all of this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">diesel::sql_types::Foldable</span>;
+
+<span class="macro">sql_function!</span> {
+    <span class="attribute">#[<span class="ident">aggregate</span>]</span>
+    <span class="attribute">#[<span class="ident">sql_name</span> <span class="op">=</span> <span class="string">&quot;SUM&quot;</span>]</span>
+    <span class="kw">fn</span> <span class="ident">sum</span><span class="op">&lt;</span><span class="ident">ST</span>: <span class="ident">Foldable</span><span class="op">&gt;</span>(<span class="ident">expr</span>: <span class="ident">ST</span>) -&gt; <span class="ident">ST::Sum</span>;
+}
+
+<span class="ident">crates</span>.<span class="ident">select</span>(<span class="ident">sum</span>(<span class="ident">id</span>));</code></pre></div>
+<h2 id="sql-functions-without-arguments"><a href="#sql-functions-without-arguments">SQL Functions without Arguments</a></h2>
+<p>A common example is ordering a query using the <code>RANDOM()</code> sql function,
+which can be implemented using <code>sql_function!</code> like this:</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="macro">sql_function!</span>(<span class="kw">fn</span> <span class="ident">random</span>() -&gt; <span class="ident">Text</span>);
+
+<span class="ident">crates</span>.<span class="ident">order</span>(<span class="ident">random</span>());</code></pre></div>
+<h2 id="use-with-sqlite"><a href="#use-with-sqlite">Use with SQLite</a></h2>
+<p>On most backends, the implementation of the function is defined in a
+migration using <code>CREATE FUNCTION</code>. On SQLite, the function is implemented in
+Rust instead. You must call <code>register_impl</code> or
+<code>register_nondeterministic_impl</code> with every connection before you can use
+the function.</p>
+<p>These functions will only be generated if the <code>sqlite</code> feature is enabled,
+and the function is not generic. Generic functions and variadic functions
+are not supported on SQLite.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">diesel::sql_types</span>::{<span class="ident">Integer</span>, <span class="ident">Double</span>};
+<span class="macro">sql_function!</span>(<span class="kw">fn</span> <span class="ident">add_mul</span>(<span class="ident">x</span>: <span class="ident">Integer</span>, <span class="ident">y</span>: <span class="ident">Integer</span>, <span class="ident">z</span>: <span class="ident">Double</span>) -&gt; <span class="ident">Double</span>);
+
+<span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">SqliteConnection::establish</span>(<span class="string">&quot;:memory:&quot;</span>)<span class="question-mark">?</span>;
+
+<span class="ident">add_mul::register_impl</span>(<span class="ident">connection</span>, <span class="op">|</span><span class="ident">x</span>: <span class="ident">i32</span>, <span class="ident">y</span>: <span class="ident">i32</span>, <span class="ident">z</span>: <span class="ident">f64</span><span class="op">|</span> {
+    (<span class="ident">x</span> <span class="op">+</span> <span class="ident">y</span>) <span class="kw">as</span> <span class="ident">f64</span> <span class="op">*</span> <span class="ident">z</span>
+})<span class="question-mark">?</span>;
+
+<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">select</span>(<span class="ident">add_mul</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1.5</span>))
+    .<span class="ident">get_result</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>(<span class="ident">connection</span>)<span class="question-mark">?</span>;
+<span class="macro">assert_eq!</span>(<span class="number">4.5</span>, <span class="ident">result</span>);</code></pre></div>
+<h3 id="panics"><a href="#panics">Panics</a></h3>
+<p>If an implementation of the custom function panics and unwinding is enabled, the panic is
+caught and the function returns to libsqlite with an error. It cannot propagate the panics due
+to the FFI bounary.</p>
+<p>This is is the same for <a href="#custom-aggregate-functions">custom aggregate functions</a>.</p>
+<h3 id="custom-aggregate-functions"><a href="#custom-aggregate-functions">Custom Aggregate Functions</a></h3>
+<p>Custom aggregate functions can be created in SQLite by adding an <code>#[aggregate]</code>
+attribute inside of <code>sql_function</code>. <code>register_impl</code> needs to be called on
+the generated function with a type implementing the
+<a href="../diesel/sqlite/trait.SqliteAggregateFunction.html">SqliteAggregateFunction</a>
+trait as a type parameter as shown in the examples below.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">diesel::sql_types::Integer</span>;
+<span class="kw">use</span> <span class="ident">diesel::sqlite::SqliteAggregateFunction</span>;
+
+<span class="macro">sql_function!</span> {
+    <span class="attribute">#[<span class="ident">aggregate</span>]</span>
+    <span class="kw">fn</span> <span class="ident">my_sum</span>(<span class="ident">x</span>: <span class="ident">Integer</span>) -&gt; <span class="ident">Integer</span>;
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="kw">struct</span> <span class="ident">MySum</span> { <span class="ident">sum</span>: <span class="ident">i32</span> }
+
+<span class="kw">impl</span> <span class="ident">SqliteAggregateFunction</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MySum</span> {
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">i32</span>;
+
+    <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">i32</span>) {
+        <span class="self">self</span>.<span class="ident">sum</span> <span class="op">+</span><span class="op">=</span> <span class="ident">expr</span>;
+    }
+
+    <span class="kw">fn</span> <span class="ident">finalize</span>(<span class="ident">aggregator</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
+        <span class="ident">aggregator</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">sum</span>).<span class="ident">unwrap_or_default</span>()
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">run</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> (<span class="ident">::std::error::Error</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">SqliteConnection::establish</span>(<span class="string">&quot;:memory:&quot;</span>)<span class="question-mark">?</span>;
+
+    <span class="ident">my_sum::register_impl</span>::<span class="op">&lt;</span><span class="ident">MySum</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">connection</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let</span> <span class="ident">total_score</span> <span class="op">=</span> <span class="ident">players</span>.<span class="ident">select</span>(<span class="ident">my_sum</span>(<span class="ident">score</span>))
+        .<span class="ident">get_result</span>::<span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span>(<span class="ident">connection</span>)<span class="question-mark">?</span>;
+
+    <span class="macro">println!</span>(<span class="string">&quot;The total score of all the players is: {}&quot;</span>, <span class="ident">total_score</span>);
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+<p>With multiple function arguments the arguments are passed as a tuple to <code>SqliteAggregateFunction</code></p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">diesel::sql_types</span>::{<span class="ident">Float</span>, <span class="ident">Nullable</span>};
+<span class="kw">use</span> <span class="ident">diesel::sqlite::SqliteAggregateFunction</span>;
+
+<span class="macro">sql_function!</span> {
+    <span class="attribute">#[<span class="ident">aggregate</span>]</span>
+    <span class="kw">fn</span> <span class="ident">range_max</span>(<span class="ident">x0</span>: <span class="ident">Float</span>, <span class="ident">x1</span>: <span class="ident">Float</span>) -&gt; <span class="ident">Nullable</span><span class="op">&lt;</span><span class="ident">Float</span><span class="op">&gt;</span>;
+}
+
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Default</span>)]</span>
+<span class="kw">struct</span> <span class="ident">RangeMax</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> { <span class="ident">max_value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> }
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">PartialOrd</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">SqliteAggregateFunction</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RangeMax</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
+
+    <span class="kw">fn</span> <span class="ident">step</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, (<span class="ident">x0</span>, <span class="ident">x1</span>): (<span class="ident">T</span>, <span class="ident">T</span>)) {
+        <span class="comment">// Compare self.max_value to x0 and x1</span>
+    }
+
+    <span class="kw">fn</span> <span class="ident">finalize</span>(<span class="ident">aggregator</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span> {
+        <span class="ident">aggregator</span><span class="question-mark">?</span>.<span class="ident">max_value</span>
+    }
+}
+
+<span class="kw">fn</span> <span class="ident">run</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> (<span class="ident">::std::error::Error</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">connection</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">SqliteConnection::establish</span>(<span class="string">&quot;:memory:&quot;</span>)<span class="question-mark">?</span>;
+
+    <span class="ident">range_max::register_impl</span>::<span class="op">&lt;</span><span class="ident">RangeMax</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">connection</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">student_avgs</span>.<span class="ident">select</span>(<span class="ident">range_max</span>(<span class="ident">s1_avg</span>, <span class="ident">s2_avg</span>))
+        .<span class="ident">get_result</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f32</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">connection</span>)<span class="question-mark">?</span>;
+
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">max_semeseter_avg</span>) <span class="op">=</span> <span class="ident">result</span> {
+        <span class="macro">println!</span>(<span class="string">&quot;The largest semester average is: {}&quot;</span>, <span class="ident">max_semeseter_avg</span>);
+    }
+
+    <span class="prelude-val">Ok</span>(())
+}</code></pre></div>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (62b272d25 2022-07-21)" ></div>
+</body></html>

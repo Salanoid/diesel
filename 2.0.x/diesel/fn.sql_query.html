@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Construct a full SQL query using raw SQL."><meta name="keywords" content="rust, rustlang, rust-lang, sql_query"><title>sql_query in diesel - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script defer src="sidebar-items.js"></script><script defer src="../main.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><h2 class="location"></h2>
+    </nav>
+    <nav class="sidebar"><a class="sidebar-logo" href="../diesel/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></div>
+        </a><div class="sidebar-elems"><h2 class="location"><a href="index.html">In diesel</a></h2></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../diesel/index.html"><img class="rust-logo" src="../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1">
+                                <a href="../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../wheel.svg"></a></div>
+                        </div></form></nav></div><section id="main-content" class="content"><div class="main-heading">
+    <h1 class="fqn"><span class="in-band">Function <a href="index.html">diesel</a>::<wbr><a class="fn" href="#">sql_query</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span></h1><span class="out-of-band"><a class="srclink" href="../src/diesel/query_builder/functions.rs.html#604-606">source</a> · <a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span></div><div class="docblock item-decl"><pre class="rust fn"><code>pub fn sql_query&lt;T:&nbsp;<a class="trait" href="https://doc.rust-lang.org/nightly/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;<a class="struct" href="https://doc.rust-lang.org/nightly/alloc/string/struct.String.html" title="struct alloc::string::String">String</a>&gt;&gt;(query: T) -&gt; <a class="struct" href="query_builder/struct.SqlQuery.html" title="struct diesel::query_builder::SqlQuery">SqlQuery</a></code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Construct a full SQL query using raw SQL.</p>
+<p>This function exists for cases where a query needs to be written that is not
+supported by the query builder. Unlike most queries in Diesel, <code>sql_query</code>
+will deserialize its data by name, not by index. That means that you cannot
+deserialize into a tuple, and structs which you deserialize from this
+function will need to have <code>#[derive(QueryableByName)]</code>.</p>
+<p>This function is intended for use when you want to write the entire query
+using raw SQL. If you only need a small bit of raw SQL in your query, use
+<a href="dsl/fn.sql.html"><code>sql</code></a> instead.</p>
+<p>Query parameters can be bound into the raw query using <a href="query_builder/struct.SqlQuery.html#method.bind"><code>SqlQuery::bind()</code></a>.</p>
+<h2 id="safety"><a href="#safety">Safety</a></h2>
+<p>The implementation of <code>QueryableByName</code> will assume that columns with a
+given name will have a certain type. The compiler will be unable to verify
+that the given type is correct. If your query returns a column of an
+unexpected type, the result may have the wrong value, or return an error.</p>
+<h2 id="examples"><a href="#examples">Examples</a></h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">let</span> <span class="ident">users</span> <span class="op">=</span> <span class="ident">sql_query</span>(<span class="string">&quot;SELECT * FROM users ORDER BY id&quot;</span>)
+    .<span class="ident">load</span>(<span class="ident">connection</span>);
+<span class="kw">let</span> <span class="ident">expected_users</span> <span class="op">=</span> <span class="macro">vec!</span>[
+    <span class="ident">User</span> { <span class="ident">id</span>: <span class="number">1</span>, <span class="ident">name</span>: <span class="string">&quot;Sean&quot;</span>.<span class="ident">into</span>() },
+    <span class="ident">User</span> { <span class="ident">id</span>: <span class="number">2</span>, <span class="ident">name</span>: <span class="string">&quot;Tess&quot;</span>.<span class="ident">into</span>() },
+];
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="ident">expected_users</span>), <span class="ident">users</span>);
+
+<span class="comment">// Checkout the documentation of your database for the correct</span>
+<span class="comment">// bind placeholder</span>
+<span class="kw">let</span> <span class="ident">users</span> <span class="op">=</span> <span class="ident">sql_query</span>(<span class="string">&quot;SELECT * FROM users WHERE id &gt; ? AND name &lt;&gt; ?&quot;</span>);
+<span class="kw">let</span> <span class="ident">users</span> <span class="op">=</span> <span class="ident">users</span>
+    .<span class="ident">bind</span>::<span class="op">&lt;</span><span class="ident">Integer</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="number">1</span>)
+    .<span class="ident">bind</span>::<span class="op">&lt;</span><span class="ident">Text</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="string">&quot;Tess&quot;</span>)
+    .<span class="ident">get_results</span>(<span class="ident">connection</span>);
+<span class="kw">let</span> <span class="ident">expected_users</span> <span class="op">=</span> <span class="macro">vec!</span>[
+    <span class="ident">User</span> { <span class="ident">id</span>: <span class="number">3</span>, <span class="ident">name</span>: <span class="string">&quot;Jim&quot;</span>.<span class="ident">into</span>() },
+];
+<span class="macro">assert_eq!</span>(<span class="prelude-val">Ok</span>(<span class="ident">expected_users</span>), <span class="ident">users</span>);</code></pre></div>
+</div></details></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="diesel" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0-nightly (62b272d25 2022-07-21)" ></div>
+</body></html>
